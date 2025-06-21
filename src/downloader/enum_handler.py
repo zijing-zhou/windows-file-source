@@ -1,8 +1,8 @@
 # downloader/enum_handler.py
 import sqlite3
 from datetime import datetime
-from .http_downloader import HTTPDownloader
-from .magnet_downloader import MagnetDownloader
+from http_downloader import HTTPDownloader
+from magnet_downloader import MagnetDownloader
 
 class ISORequestHandler:
     def __init__(self, db_path='iso.db'):
