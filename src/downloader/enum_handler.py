@@ -26,7 +26,7 @@ class ISORequestHandler:
                 if type_ == 'http':
                     local_filename = self.http.download(url)
                 elif type_ in ['magnet', 'magnet:?']:
-                    self.magnet.download(url)
+                    local_filename = self.magnet.download(url)
                 else:
                     print(f"Unsupported type: {type_}")
                     continue
