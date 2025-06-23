@@ -6,7 +6,6 @@ from urllib.parse import unquote
 
 class MagnetDownloader:
     def _extract_filename(self, handle):
-        """从磁力链接元数据中提取文件名"""
         info = handle.get_torrent_info()
         if info.num_files() > 1:
             return info.name()

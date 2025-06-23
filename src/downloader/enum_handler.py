@@ -31,12 +31,10 @@ class ISORequestHandler:
                     print(f"Unsupported type: {type_}")
                     continue
 
-                # 成功后更新 finish_time
                 cur.execute("UPDATE iso_file_request SET finish_time=?, retry_count=?, retry_count=? WHERE id=?",
                             (datetime.now(), retry + 1, local_filename, id))
             except Exception as e:
                 print(f"Error processing ID {id}: {e}")
-                # 更新 retry_count 增加
                 cur.execute("UPDATE iso_file_request SET retry_count=? WHERE id=?",
                             (retry + 1, id))
 
