@@ -2,8 +2,15 @@
 import libtorrent as lt
 import time
 import os
+from urllib.parse import unquote
 
 class MagnetDownloader:
+    def _extract_filename(self, handle):
+        """从磁力链接元数据中提取文件名"""
+        info = handle.get_torrent_info()
+        if info.num_files() > 1:
+            return info.name()
+        return info.files().file_path(0)
     def download(self, magnet_link, save_path='downloads/'):
         os.makedirs(save_path, exist_ok=True)
         ses = lt.session()
@@ -18,12 +25,10 @@ class MagnetDownloader:
         print("Waiting for metadata...")
         while not handle.has_metadata():
             time.sleep(1)
-
         print("Downloading...")
         while not handle.is_seed():
             status = handle.status()
             print(f"{status.progress * 100:.2f}% done. Download rate: {status.download_rate / 1000:.2f} kB/s")
             time.sleep(5)
 
-        print("Download completed.")
-        return True
+        return unquote(self._extract_filename(handle))

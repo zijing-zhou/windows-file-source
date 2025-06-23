@@ -8,7 +8,10 @@ CREATE TABLE IF NOT EXISTS iso_file_request (
     type TEXT,
     insert_time DATETIME,
     finish_time DATETIME,
-    retry_count INTEGER DEFAULT 0
+    retry_count INTEGER DEFAULT 0,
+    sourceSHA1 TEXT,
+    fileSHA1 TEXT,
+    state TEXT
 )
 """)
 conn.commit()

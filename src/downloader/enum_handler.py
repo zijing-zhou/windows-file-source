@@ -24,7 +24,7 @@ class ISORequestHandler:
 
             try:
                 if type_ == 'http':
-                    self.http.download(url)
+                    local_filename = self.http.download(url)
                 elif type_ in ['magnet', 'magnet:?']:
                     self.magnet.download(url)
                 else:
@@ -32,8 +32,8 @@ class ISORequestHandler:
                     continue
 
                 # 成功后更新 finish_time
-                cur.execute("UPDATE iso_file_request SET finish_time=?, retry_count=? WHERE id=?",
-                            (datetime.now(), retry + 1, id))
+                cur.execute("UPDATE iso_file_request SET finish_time=?, retry_count=?, retry_count=? WHERE id=?",
+                            (datetime.now(), retry + 1, local_filename, id))
             except Exception as e:
                 print(f"Error processing ID {id}: {e}")
                 # 更新 retry_count 增加
