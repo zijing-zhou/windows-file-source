@@ -38,8 +38,8 @@ class IsoFileProcessor:
                     UPDATE iso_file_request 
                     SET fileSHA1 = ?, state = 'FileReady' 
                     WHERE id = ?
-                """, (current_sha1, file_id))                
-                self.conn.commit()                
+                """, (current_sha1, file_id))
+                self.conn.commit()
             except FileNotFoundError:
                 continue
             except Exception as e:
