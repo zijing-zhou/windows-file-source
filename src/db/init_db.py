@@ -14,5 +14,22 @@ CREATE TABLE IF NOT EXISTS iso_file_request (
     state TEXT
 )
 """)
+cur.execute("""
+CREATE TABLE IF NOT EXISTS windows_file_info (
+    id INTEGER PRIMARY KEY,
+    relative_path TEXT,
+    file_name TEXT,
+    file_size INTEGER,
+    sha256 TEXT,
+    sha1 TEXT,
+    md5 TEXT, 
+    version TEXT,
+    owner TEXT,
+    vendor TEXT,
+    isoSHA1 TEXT,
+    insert_time DATETIME,
+    state TEXT
+)
+""")
 conn.commit()
 conn.close()
