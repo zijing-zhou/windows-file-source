@@ -28,7 +28,17 @@ CREATE TABLE IF NOT EXISTS windows_file_info (
     vendor TEXT,
     isoSHA1 TEXT,
     insert_time DATETIME,
-    state TEXT
+    state TEXT,
+    create_time DATETIME,
+    modify_time DATETIME,
+    access_time DATETIME,
+    is_hidden BOOLEAN,
+    is_system BOOLEAN,
+    is_readonly BOOLEAN,
+    is_signed BOOLEAN,
+    issuer TEXT,
+    thumbprint TEXT,
+    signing_time DATETIME
 )
 """)
 conn.commit()
