@@ -79,14 +79,12 @@ class WindowsFileInfo:
                         return win32api.GetFileVersionInfo(self.filepath, str_info_path + name)
                     except:
                         return None
-                
-                # 获取所有版本信息字段
                 self.file_description = get_str_info('FileDescription')
                 self.original_filename = get_str_info('OriginalFilename')
                 self.internal_name = get_str_info('InternalName')
                 self.file_version = get_str_info('FileVersion')
                 self.product_version = get_str_info('ProductVersion')
-                self.version_number = self.version  # 使用已解析的版本号
+                self.version_number = self.version
                 self.company_name = get_str_info('CompanyName')
                 self.legal_copyright = get_str_info('LegalCopyright')
                 self.legal_trademarks = get_str_info('LegalTrademarks')
@@ -97,12 +95,10 @@ class WindowsFileInfo:
                 self.language = get_str_info('Language')
                 self.type = get_str_info('Type')
                 self.copyright = get_str_info('Copyright')
-                
-                # 保持向后兼容
+
                 self.company = self.company_name
                 
         except Exception as e:
-            # 保持原有错误处理
             self.version = None
             self.company = None
 
