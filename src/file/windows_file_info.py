@@ -24,6 +24,22 @@ class WindowsFileInfo:
         self.version = None
         self.company = None
         self.owner = None
+        self.file_description = None
+        self.original_filename = None
+        self.internal_name = None
+        self.file_version = None
+        self.product_version = None
+        self.version_number = None
+        self.company_name = None
+        self.legal_copyright = None
+        self.legal_trademarks = None
+        self.product_name = None
+        self.private_build = None
+        self.special_build = None
+        self.operating_system = None
+        self.language = None
+        self.type = None
+        self.copyright = None
 
         self._get_basic_info()
         self._get_file_attributes()
@@ -53,14 +69,40 @@ class WindowsFileInfo:
             ls = info['FileVersionLS']
             self.version = f"{ms >> 16}.{ms & 0xFFFF}.{ls >> 16}.{ls & 0xFFFF}"
 
-            lang, codepage = win32api.GetFileVersionInfo(self.filepath, r'\VarFileInfo\Translation')[0]
-            str_info = lambda name: win32api.GetFileVersionInfo(
-                self.filepath,
-                f'\\StringFileInfo\\{lang:04X}{codepage:04X}\\{name}'
-            )
-
-            self.company = str_info('CompanyName')
+            translations = win32api.GetFileVersionInfo(self.filepath, r'\VarFileInfo\Translation')
+            if translations:
+                lang, codepage = translations[0]
+                str_info_path = f'\\StringFileInfo\\{lang:04X}{codepage:04X}\\'
+                
+                def get_str_info(name):
+                    try:
+                        return win32api.GetFileVersionInfo(self.filepath, str_info_path + name)
+                    except:
+                        return None
+                
+                # 获取所有版本信息字段
+                self.file_description = get_str_info('FileDescription')
+                self.original_filename = get_str_info('OriginalFilename')
+                self.internal_name = get_str_info('InternalName')
+                self.file_version = get_str_info('FileVersion')
+                self.product_version = get_str_info('ProductVersion')
+                self.version_number = self.version  # 使用已解析的版本号
+                self.company_name = get_str_info('CompanyName')
+                self.legal_copyright = get_str_info('LegalCopyright')
+                self.legal_trademarks = get_str_info('LegalTrademarks')
+                self.product_name = get_str_info('ProductName')
+                self.private_build = get_str_info('PrivateBuild')
+                self.special_build = get_str_info('SpecialBuild')
+                self.operating_system = get_str_info('OperatingSystem')
+                self.language = get_str_info('Language')
+                self.type = get_str_info('Type')
+                self.copyright = get_str_info('Copyright')
+                
+                # 保持向后兼容
+                self.company = self.company_name
+                
         except Exception as e:
+            # 保持原有错误处理
             self.version = None
             self.company = None
 
