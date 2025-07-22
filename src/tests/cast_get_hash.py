@@ -6,7 +6,7 @@ from src.file.directory_walker import DirectoryWalker
 from src.file.file_hash_calculator import FileHashCalculator
 from src.file.file_signature_info import FileSignatureInfo
 from src.file.windows_file_info import WindowsFileInfo
-def print_callback(path, is_dir):
+def print_callback(path, is_dir, archive_name, temp_dir):
     type_str = "Directory" if is_dir else "File"
     print(f"{type_str}: {path}")
     if not is_dir:
@@ -14,6 +14,12 @@ def print_callback(path, is_dir):
         fileHash = FileHashCalculator( path )
         fileSignature = FileSignatureInfo( path )
         
+        if not archive_name:
+            work_path = path
+        else:
+            relative_path = os.path.relpath(path, temp_dir)
+            work_path = os.path.join(archive_name, relative_path)
+
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO windows_file_info (
@@ -31,7 +37,7 @@ def print_callback(path, is_dir):
                 operating_system, language, file_type, copyright, Extension
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            path[2:], os.path.basename(path), fileInfo.size,
+            work_path[2:], os.path.basename(path), fileInfo.size,
             fileHash.sha256, fileHash.sha1, fileHash.md5,
             fileInfo.version, fileInfo.owner, fileInfo.company, "",
             datetime.now(), "ok",
