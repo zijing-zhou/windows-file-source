@@ -11,7 +11,7 @@ class DirectoryWalker:
         self.callback = callback
 
     def walk(self, archive_name=None, temp_dir=None):
-        work_dir = self.root_path if not archive_name else archive_name
+        work_dir = self.root_path if not temp_dir else temp_dir
         for dirpath, dirnames, filenames in os.walk(work_dir):
             self.callback(dirpath, True, archive_name, temp_dir)
             for dirname in dirnames:
