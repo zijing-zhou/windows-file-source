@@ -20,3 +20,12 @@ Perform a comprehensive analysis of all files within the Windows installation me
     - Which files change after selecting different system components
 
     - Which files change after deploying system patches
+      
+5. Expected Verification Technologies‌:
+
+    - Which files change after deploying system patches
+    - Windows Automated Installation Technology‌
+
+    - Virtualization File Analysis‌
+    
+    - Common Package File Formats in Windows Installation Process
