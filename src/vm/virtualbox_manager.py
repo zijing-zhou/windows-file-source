@@ -6,7 +6,7 @@ from vboxshell import argsToMach
 
 class VirtualBox:
     def __init__(self, ctx=None):
-        vbox_mgr = VirtualBoxManager()  # 本地管理, 可选用 "Microsoft Windows", "python"
+        vbox_mgr = VirtualBoxManager() 
         ctx = {
             'global': vbox_mgr,
             'vb': vbox_mgr.getVirtualBox(),
