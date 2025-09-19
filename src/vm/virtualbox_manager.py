@@ -21,6 +21,22 @@ class VirtualBox:
         mach = argsToMach(self.ctx, name)
         startVm(self.ctx, mach, "gui")
 
+    def poweroff_windows_vm(self, name):
+        mach = argsToMach(self.ctx, name)
+        pass
+
+    def backup_windows_vm(self, name):
+        mach = argsToMach(self.ctx, name)
+        pass
+
+    def restore_windows_vm(self, name):
+        mach = argsToMach(self.ctx, name)
+        pass
+        
     def remove_windows_vm(self, name):
         mach = argsToMach(self.ctx, name)
         removeVm(self.ctx, mach)
+        
+
+
+
