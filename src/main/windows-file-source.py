@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
-
+from vm.virtualbox_manager import VirtualBox
 class WindowsFileSource:
     def __init__(self):
         pass
@@ -56,7 +56,9 @@ class WindowsFileSource:
             pass
         else:
             return
-
+        vbox = VirtualBox()
+        vbox.create_windows_vm("Win10-VM", "x64", "Windows10_64")
+        
     # Simulate analyze VMDK operation
     def analyze_vmdk(self):
         print("Analyzing VMDK file...")
