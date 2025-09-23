@@ -1,6 +1,16 @@
 {
-    "python.analysis.extraPaths": [
-        "./src",
-        "./lib"
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "name": "Python: Run",
+            "type": "python",
+            "request": "launch",
+            "program": "src/main/windows-file-source.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "justMyCode": true
+        }
     ]
 }
