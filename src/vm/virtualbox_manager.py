@@ -1,8 +1,8 @@
 from vboxapi import VirtualBoxManager
-from vboxshell import createVm
-from vboxshell import startVm
-from vboxshell import removeVm
-from vboxshell import argsToMach
+from vm.vboxshell import createVm
+from vm.vboxshell import startVm
+from vm.vboxshell import removeVm
+from vm.vboxshell import argsToMach
 
 class VirtualBox:
     def __init__(self, ctx=None):
