@@ -1,16 +1,20 @@
 {
-    "version": "0.1.0",
+    "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Run",
+            "name": "Python: Debug Windows File Source",
             "type": "python",
             "request": "launch",
-            "program": "src/main/windows-file-source.py",
-            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/src/main/windows-file-source.py",
+            "cwd": "${workspaceFolder}/src",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             },
-            "justMyCode": true
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": false,
+            "python": "${command:python.interpreterPath}",
+            "args": []
         }
     ]
 }
