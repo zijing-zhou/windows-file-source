@@ -1,5 +1,5 @@
 import tkinter as tk
-from main import _version
+import _version
 from tkinter import filedialog
 from vm.virtualbox_manager import VirtualBox
 class WindowsFileSource:
