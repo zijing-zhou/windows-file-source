@@ -1,4 +1,5 @@
 import tkinter as tk
+from main import _version
 from tkinter import filedialog
 from vm.virtualbox_manager import VirtualBox
 class WindowsFileSource:
@@ -69,6 +70,7 @@ class WindowsFileSource:
 
 # The main loop for interacting with the user
 if __name__ == '__main__':
+    print("Windows Source File: ",_version.get_version())
     windows_file_source = WindowsFileSource()
     
     # Keep calling the menu until the user chooses to exit
