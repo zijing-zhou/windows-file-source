@@ -2,7 +2,9 @@
 #vboxapi>=1.0
 
 # ===== HTTP =====
+requests==2.31.0 
 
 # ===== ISO =====
 
 # ===== magnet =====
+python-libtorrent==2.0.9 
