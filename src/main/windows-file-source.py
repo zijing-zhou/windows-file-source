@@ -1,7 +1,11 @@
 import tkinter as tk
 import _version
+import os
+import re
+from datetime import datetime
 from tkinter import filedialog
 from vm.virtualbox_manager import VirtualBox
+
 class WindowsFileSource:
     def __init__(self):
         pass
@@ -46,19 +50,25 @@ class WindowsFileSource:
 
     # Simulate install Windows VM operation
     def install_windows_vm(self):
-        print("Installing Windows Virtual Machine...")
         root = tk.Tk()
         root.withdraw()
+        
         file_path = filedialog.askopenfilename(
             title="Open ISO File",
             filetypes=[("ISO files", "*.iso"), ("All files", "*.*")] 
         )
+        
         if file_path:
-            pass
+            vbox = VirtualBox()
+            name = self.generate_timestamp_name()
+            arch = self.get_iso_arch_by_name(file_path)
+            version = self.get_windows_version(file_path)
+            kind = version + '_' + arch[1:]
+            vbox.create_windows_vm(name, arch, kind)
+            #todo set iso
+            #set system param
         else:
             return
-        vbox = VirtualBox()
-        vbox.create_windows_vm("Win10-VM", "x64", "Windows10_64")
         
     # Simulate analyze VMDK operation
     def analyze_vmdk(self):
@@ -67,7 +77,38 @@ class WindowsFileSource:
     # Simulate import local ISO operation
     def import_local_iso(self):
         print("Importing local ISO...")
+    
+    def generate_timestamp_name(self):
+        return datetime.now().strftime("%Y%m%d%H%M%S")
+    
+    def get_iso_arch_by_name(self, iso_path):
+        filename = os.path.basename(iso_path).lower()
+        
+        if any(x in filename for x in ['x64', 'amd64', '64bit', '64-bit']):
+            return 'x64'
+        elif any(x in filename for x in ['x86', 'i386', '32bit', '32-bit']):
+            return 'x86'
+        return 'unknown'
 
+    def get_windows_version(self, iso_path: str) -> str:
+        try:
+            filename = os.path.basename(iso_path).lower()
+            
+            if any(x in filename for x in ['win11', 'windows11', 'win 11', 'windows 11', 'windows_11']):
+                return 'Windows11'
+            elif any(x in filename for x in ['win10', 'windows10', 'win 10', 'windows 10', 'windows_10']):
+                return 'Windows10'
+            elif any(x in filename for x in ['win8', 'windows8', 'win 8', 'windows 8', 'windows_8']):
+                return 'Windows8'
+            elif any(x in filename for x in ['win7', 'windows7', 'win 7', 'windows 7', 'windows_7']):
+                return 'Windows7'
+            else:
+                return 'Unknown'
+                
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return 'Unknown'
+        
 # The main loop for interacting with the user
 if __name__ == '__main__':
     print("Windows Source File: ",_version.get_version())
