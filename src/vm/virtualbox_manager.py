@@ -10,11 +10,16 @@ class VirtualBox:
         ctx = {
             'global': vbox_mgr,
             'vb': vbox_mgr.getVirtualBox(),
-            'const': vbox_mgr.constants
+            'const': vbox_mgr.constants,
+            '_machlist': None,
+            'remote': False,
+            'perf': None
         }
         self.ctx = ctx
-
+                
     def create_windows_vm(self, name, arch, kind):
+        if '_machlist' not in self.ctx:
+            self.ctx['_machlist'] = None
         createVm(self.ctx, name, arch, kind)
 
     def start_windows_vm(self, name):
