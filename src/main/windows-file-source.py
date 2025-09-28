@@ -65,7 +65,7 @@ class WindowsFileSource:
             version = self.get_windows_version(file_path)
             kind = version + '_' + arch[1:]
             vbox.create_windows_vm(name, arch, kind)
-            #todo set iso
+            vbox.set_vm_iso(name, file_path)
             #set system param
         else:
             return
