@@ -65,8 +65,8 @@ class WindowsFileSource:
             version = self.get_windows_version(file_path)
             kind = version + '_' + arch[1:]
             vbox.create_windows_vm(name, arch, kind)
-            vbox.set_vm_iso(name, file_path)
-            #set system param
+            vbox.set_vm_memory(name, 32)
+            vbox.create_complete_sata_setup(vm_name=name, iso_path=file_path, hdd_path="d:\\disk.vdi")
         else:
             return
         
