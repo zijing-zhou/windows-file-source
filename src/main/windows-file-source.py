@@ -1,8 +1,8 @@
-import tkinter as tk
-import _version
 import os
 import re
+import _version
 from datetime import datetime
+import tkinter as tk
 from tkinter import filedialog
 from vm.virtualbox_manager import VirtualBox
 
@@ -66,7 +66,8 @@ class WindowsFileSource:
             kind = version + '_' + arch[1:]
             vbox.create_windows_vm(name, arch, kind)
             vbox.set_vm_memory(name, 32)
-            vbox.create_complete_sata_setup(vm_name=name, iso_path=file_path, hdd_path="d:\\disk.vdi")
+            #todo set iso and vdi
+            vbox.create_complete_sata_setup(vm_name=name, iso_path=file_path, hdd_path)
         else:
             return
         
@@ -83,7 +84,6 @@ class WindowsFileSource:
     
     def get_iso_arch_by_name(self, iso_path):
         filename = os.path.basename(iso_path).lower()
-        
         if any(x in filename for x in ['x64', 'amd64', '64bit', '64-bit']):
             return 'x64'
         elif any(x in filename for x in ['x86', 'i386', '32bit', '32-bit']):
