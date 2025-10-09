@@ -68,8 +68,6 @@ class WindowsFileSource:
             vbox.set_vm_memory(name, 32)
             #todo set iso and vdi
             vbox.create_complete_sata_setup(vm_name=name, iso_path=file_path, hdd_path)
-        else:
-            return
         
     # Simulate analyze VMDK operation
     def analyze_vmdk(self):
