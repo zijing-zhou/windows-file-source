@@ -60,14 +60,15 @@ class WindowsFileSource:
         
         if file_path:
             vbox = VirtualBox()
-            name = self.generate_timestamp_name()
+            vm_name = self.generate_timestamp_name()
             arch = self.get_iso_arch_by_name(file_path)
             version = self.get_windows_version(file_path)
             kind = version + '_' + arch[1:]
-            vbox.create_windows_vm(name, arch, kind)
-            vbox.set_vm_memory(name, 32)
+            vbox.create_windows_vm(vm_name, arch, kind)
+            vbox.set_vm_memory(vm_name, 32)
             #todo set iso and vdi
-            vbox.create_complete_sata_setup(vm_name=name, iso_path=file_path, hdd_path)
+            vbox.create_complete_sata_setup(vm_name=vm_name, iso_path=file_path, hdd_path)
+            vbox.start_vm(vm_name)
         
     # Simulate analyze VMDK operation
     def analyze_vmdk(self):
