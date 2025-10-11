@@ -69,6 +69,9 @@ class WindowsFileSource:
             #todo set iso and vdi
             vbox.create_complete_sata_setup(vm_name=vm_name, iso_path=file_path, hdd_path)
             vbox.start_vm(vm_name)
+            print("Install ...")
+            # wait install finish
+            vbox.start_shutdown(vm_name)
         
     # Simulate analyze VMDK operation
     def analyze_vmdk(self):
