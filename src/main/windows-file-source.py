@@ -51,13 +51,11 @@ class WindowsFileSource:
     # Simulate install Windows VM operation
     def install_windows_vm(self):
         root = tk.Tk()
-        root.withdraw()
-        
+        root.withdraw()        
         file_path = filedialog.askopenfilename(
             title="Open ISO File",
             filetypes=[("ISO files", "*.iso"), ("All files", "*.*")] 
-        )
-        
+        )        
         if file_path:
             vbox = VirtualBox()
             vm_name = self.generate_timestamp_name()
@@ -72,7 +70,8 @@ class WindowsFileSource:
             print("Install ...")
             # wait install finish
             vbox.start_shutdown(vm_name)
-        
+            # save info to db
+                    
     # Simulate analyze VMDK operation
     def analyze_vmdk(self):
         print("Analyzing VMDK file...")
