@@ -63,13 +63,12 @@ class WindowsFileSource:
             version = self.get_windows_version(file_path)
             kind = version + '_' + arch[1:]
             vbox.create_windows_vm(vm_name, arch, kind)
-            vbox.set_vm_memory(vm_name, 32)
+            vbox.set_vm_resources(vm_name, memory_gb= 16, cpu_count=4)
             #todo set iso and vdi
-            vbox.create_complete_sata_setup(vm_name=vm_name, iso_path=file_path, hdd_path)
-            vbox.start_vm(vm_name)
-            print("Install ...")
+            #vbox.create_complete_sata_setup(vm_name=vm_name, iso_path=file_path, hdd_path)
+            #vbox.start_vm(vm_name)
             # wait install finish
-            vbox.start_shutdown(vm_name)
+            #vbox.start_shutdown(vm_name)
             # save info to db
                     
     # Simulate analyze VMDK operation
