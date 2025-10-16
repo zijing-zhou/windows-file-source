@@ -65,6 +65,15 @@ class WindowsFileSource:
             vbox.create_windows_vm(vm_name, arch, kind)
             vbox.set_vm_resources(vm_name, memory_gb= 16, cpu_count=4)
             #todo set iso and vdi
+            generator = AutoUnattendGenerator(
+                username="AdminUser",
+                password=vm_name,
+                hostname=vm_name,
+                timezone="China Standard Time",
+                language="zh-CN"
+            )
+            generator.generate("autounattend.xml")
+            #todo save autounattend.xml
             #vbox.create_complete_sata_setup(vm_name=vm_name, iso_path=file_path, hdd_path)
             #vbox.start_vm(vm_name)
             # wait install finish
