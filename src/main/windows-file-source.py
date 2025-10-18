@@ -5,6 +5,7 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog
 from vm.virtualbox_manager import VirtualBox
+from os.windows import AutoUnattendGenerator
 
 class WindowsFileSource:
     def __init__(self):
@@ -72,7 +73,7 @@ class WindowsFileSource:
                 timezone="China Standard Time",
                 language="zh-CN"
             )
-            generator.generate("autounattend.xml")
+            generator.generate_windows10("autounattend.xml")
             #todo save autounattend.xml
             #vbox.create_complete_sata_setup(vm_name=vm_name, iso_path=file_path, hdd_path)
             #vbox.start_vm(vm_name)
