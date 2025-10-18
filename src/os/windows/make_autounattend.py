@@ -14,7 +14,7 @@ class AutoUnattendGenerator:
         reparsed = minidom.parseString(rough_string)
         return reparsed.toprettyxml(indent="  ", encoding="utf-8")
 
-    def generate(self, output_file="autounattend.xml"):
+    def generate_windows10(self, output_file="autounattend.xml"):
         root = ET.Element("unattend", xmlns="urn:schemas-microsoft-com:unattend")
 
         settings_pe = ET.SubElement(root, "settings", pass="windowsPE")
