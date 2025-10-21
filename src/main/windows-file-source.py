@@ -5,7 +5,7 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog
 from vm.virtualbox_manager import VirtualBox
-from os.windows import AutoUnattendGenerator
+from myos.windows.make_autounattend import AutoUnattendGenerator
 
 class WindowsFileSource:
     def __init__(self):

@@ -16,9 +16,7 @@ class AutoUnattendGenerator:
 
     def generate_windows10(self, output_file="autounattend.xml"):
         root = ET.Element("unattend", xmlns="urn:schemas-microsoft-com:unattend")
-
-        settings_pe = ET.SubElement(root, "settings", pass="windowsPE")
-
+        settings_pe = ET.SubElement(root, "settings", **{"pass": "windowsPE"})
         comp_pe = ET.SubElement(settings_pe, "component", name="Microsoft-Windows-International-Core-WinPE", processorArchitecture="amd64", publicKeyToken="31bf3856ad364e35", language="neutral", versionScope="nonSxS")
         ET.SubElement(comp_pe, "InputLocale").text = self.language
         ET.SubElement(comp_pe, "SystemLocale").text = self.language
@@ -40,12 +38,12 @@ class AutoUnattendGenerator:
 
         ET.SubElement(comp_disk, "UserData").append(ET.Element("AcceptEula", text="true"))
 
-        settings_spec = ET.SubElement(root, "settings", pass="specialize")
+        settings_spec = ET.SubElement(root, "settings", **{"pass": "specialize"})
         comp_spec = ET.SubElement(settings_spec, "component", name="Microsoft-Windows-Shell-Setup", processorArchitecture="amd64", publicKeyToken="31bf3856ad364e35", language="neutral", versionScope="nonSxS")
         ET.SubElement(comp_spec, "ComputerName").text = self.hostname
         ET.SubElement(comp_spec, "TimeZone").text = self.timezone
 
-        settings_oobe = ET.SubElement(root, "settings", pass="oobeSystem")
+        settings_oobe = ET.SubElement(root, "settings", **{"pass": "oobeSystem"})
         comp_oobe = ET.SubElement(settings_oobe, "component", name="Microsoft-Windows-Shell-Setup", processorArchitecture="amd64", publicKeyToken="31bf3856ad364e35", language="neutral", versionScope="nonSxS")
 
         user_accounts = ET.SubElement(comp_oobe, "UserAccounts")
