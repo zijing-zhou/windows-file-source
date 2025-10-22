@@ -3,9 +3,12 @@ import re
 import _version
 from datetime import datetime
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, simpledialog, messagebox
 from vm.virtualbox_manager import VirtualBox
+from iso.make_iso import ISOBuilder
 from myos.windows.make_autounattend import AutoUnattendGenerator
+from pathlib import Path
+
 
 class WindowsFileSource:
     def __init__(self):
@@ -49,6 +52,16 @@ class WindowsFileSource:
     def analyze_iso(self):
         print("Analyzing ISO...")
 
+    def ask_number(self, prompt, title, initial):
+        while True:
+            value = simpledialog.askstring(title, prompt, initialvalue=initial)
+            if value is None:
+                return None
+            if value.isdigit():
+                return int(value)
+            else:
+                messagebox.showerror("Invalid input", "Please enter a valid number!")
+
     # Simulate install Windows VM operation
     def install_windows_vm(self):
         root = tk.Tk()
@@ -56,16 +69,26 @@ class WindowsFileSource:
         file_path = filedialog.askopenfilename(
             title="Open ISO File",
             filetypes=[("ISO files", "*.iso"), ("All files", "*.*")] 
-        )        
+        )
         if file_path:
+            cpu_num = self.ask_number("Number of CPU", "Please enter the number:", "4")
+            if cpu_num is None:
+                return
+            memory_num = self.ask_number("Base Memory(GB)", "Please enter the number:", "16")
+            if memory_num is None:
+                return
             vbox = VirtualBox()
             vm_name = self.generate_timestamp_name()
             arch = self.get_iso_arch_by_name(file_path)
             version = self.get_windows_version(file_path)
             kind = version + '_' + arch[1:]
             vbox.create_windows_vm(vm_name, arch, kind)
-            vbox.set_vm_resources(vm_name, memory_gb= 16, cpu_count=4)
-            #todo set iso and vdi
+            settingsFilePath = vbox.getSettingsFilePathByName(vm_name)
+            file_path = Path(settingsFilePath)
+            settingsFileDirectory = file_path.parent
+            vbox.set_vm_resources(vm_name, memory_gb = memory_num, cpu_count = cpu_num, 
+                                  store_mb = 1024*100, store_path = settingsFileDirectory / "store.vdi")
+            os.makedirs(settingsFileDirectory / "iso", exist_ok=True)
             generator = AutoUnattendGenerator(
                 username="AdminUser",
                 password=vm_name,
@@ -73,9 +96,10 @@ class WindowsFileSource:
                 timezone="China Standard Time",
                 language="zh-CN"
             )
-            generator.generate_windows10("autounattend.xml")
-            #todo save autounattend.xml
-            #vbox.create_complete_sata_setup(vm_name=vm_name, iso_path=file_path, hdd_path)
+            generator.generate_windows10(settingsFileDirectory / "iso" / "autounattend.xml")
+            output_iso = Path(settingsFileDirectory / "autounattend.iso")
+            builder = ISOBuilder()
+            builder.write(output_iso, settingsFileDirectory / "iso", vm_name)
             #vbox.start_vm(vm_name)
             # wait install finish
             #vbox.start_shutdown(vm_name)
