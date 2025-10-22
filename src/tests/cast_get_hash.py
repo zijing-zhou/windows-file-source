@@ -2,10 +2,10 @@ import sqlite3
 import os
 from datetime import datetime
 
-from src.file.directory_walker import DirectoryWalker
-from src.file.file_hash_calculator import FileHashCalculator
-from src.file.file_signature_info import FileSignatureInfo
-from src.file.windows_file_info import WindowsFileInfo
+from file.directory_walker import DirectoryWalker
+from file.file_hash_calculator import FileHashCalculator
+from file.file_signature_info import FileSignatureInfo
+from file.windows_file_info import WindowsFileInfo
 def print_callback(path, is_dir, archive_name, temp_dir):
     type_str = "Directory" if is_dir else "File"
     print(f"{type_str}: {path}")
