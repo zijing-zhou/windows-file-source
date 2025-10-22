@@ -4,6 +4,7 @@ from vm.vboxshell import startVm
 from vm.vboxshell import removeVm
 from vm.vboxshell import argsToMach
 from vm.vboxshell import getMachines
+from vm.vboxshell import findDevOfType
 
 class VirtualBox:
     def __init__(self, ctx=None):
@@ -18,11 +19,11 @@ class VirtualBox:
         }
         self.ctx = ctx
         self.vbox_mgr = vbox_mgr
-                
+
     def create_windows_vm(self, name, arch, kind):
         if '_machlist' not in self.ctx:
             self.ctx['_machlist'] = None
-        createVm(self.ctx, name, arch, kind)        
+        createVm(self.ctx, name, arch, kind)
 
     def start_windows_vm(self, name):
         uuid = self.getUUIDByName(name)
@@ -52,17 +53,23 @@ class VirtualBox:
         uuid = self.getUUIDByName(name)
         if uuid is not None:
             mach = argsToMach(self.ctx, [name, uuid])
-            removeVm(self.ctx, mach)        
+            removeVm(self.ctx, mach)
         
-    def set_vm_resources(self, name, cpu_count: int = 2, memory_gb: int = 4):
+    def set_vm_resources(self, name, store_path, store_mb,
+                         cpu_count: int = 2, memory_gb: int = 4):
         vbox = self.ctx['vb']
         uuid = self.getUUIDByName(name)
         if uuid is not None:
+            hdd = vbox.createMedium("vdi", store_path, self.ctx['global'].constants.AccessMode_ReadWrite, 
+                                    self.ctx['global'].constants.DeviceType_HardDisk)
+            hdd.createBaseStorage(store_mb, (self.ctx['global'].constants.MediumVariant_Standard, ))
             mach = argsToMach(self.ctx, [name, uuid])
             session = self.ctx['global'].openMachineSession(mach, fPermitSharing=True)
             mach = session.machine
             try:
                 m = mach
+                [ctr, port, slot] = findDevOfType(self.ctx, m, self.ctx['global'].constants.DeviceType_HardDisk)
+                m.attachDevice(ctr, port, slot, self.ctx['global'].constants.DeviceType_HardDisk, hdd.id)
                 m.MemorySize = memory_gb * 1024
                 m.CPUCount = cpu_count
                 m.saveSettings()
@@ -78,3 +85,11 @@ class VirtualBox:
                 return None
         return None
 
+    def getSettingsFilePathByName(self, name):
+        for mach in getMachines(self.ctx, True):
+            try:
+                if mach.name == name:
+                    return mach.settingsFilePath
+            except Exception as e:
+                return None
+        return None
