@@ -100,6 +100,8 @@ class WindowsFileSource:
             output_iso = Path(settingsFileDirectory / "autounattend.iso")
             builder = ISOBuilder()
             builder.write(output_iso, settingsFileDirectory / "iso", vm_name)
+            #add iso
+            #add hhd
             #vbox.start_vm(vm_name)
             # wait install finish
             #vbox.start_shutdown(vm_name)
