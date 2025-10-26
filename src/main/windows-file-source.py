@@ -103,9 +103,9 @@ class WindowsFileSource:
             #add iso
             #add hhd
             #vbox.start_vm(vm_name)
-            # wait install finish
+            #wait install finish
             #vbox.start_shutdown(vm_name)
-            # save info to db
+            #save info to db
                     
     # Simulate analyze VMDK operation
     def analyze_vmdk(self):
