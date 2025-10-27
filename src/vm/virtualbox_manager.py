@@ -55,27 +55,96 @@ class VirtualBox:
             mach = argsToMach(self.ctx, [name, uuid])
             removeVm(self.ctx, mach)
         
+    def create_storage_controller(self, machine):
+        try:
+            controller_name = "SATA Controller"
+            controller = machine.addStorageController(
+                controller_name,
+                self.ctx['global'].constants.StorageBus_SATA
+            )
+            
+            controller.portCount = 30
+            controller.useHostIOCache = True
+            
+            return {
+                'controller': 0,
+                'port': 0,      
+                'slot': 0       
+            }
+        except Exception as e:
+            return None
+    
     def set_vm_resources(self, name, store_path, store_mb,
                          cpu_count: int = 2, memory_gb: int = 4):
         vbox = self.ctx['vb']
+        session = self.ctx['global'].getSessionObject(vbox)
+        
+        uuid = self.getUUIDByName(name)
+        if uuid is not None:
+            mach = argsToMach(self.ctx, [name, uuid])
+        
+            lock_result = mach.lockMachine(session, self.ctx['global'].constants.LockType_Write)
+            if lock_result != 0:
+                return False
+
+            m = session.machine
+
+            hdd = vbox.createMedium("vdi", store_path, 
+                                self.ctx['global'].constants.AccessMode_ReadWrite, 
+                                self.ctx['global'].constants.DeviceType_HardDisk)
+            progress = hdd.createBaseStorage(store_mb * 1024 * 1024, 
+                                            [self.ctx['global'].constants.MediumVariant_Standard])
+            progress.waitForCompletion(-1)
+            if progress.resultCode != 0:
+                return False
+
+            controller_name = "SATA"
+            try:
+                sata_controller = m.addStorageController(controller_name, 
+                                                    self.ctx['global'].constants.StorageBus_SATA)
+                sata_controller.portCount = 30
+                sata_controller.useHostIOCache = True
+                
+            except Exception as e:
+                return False
+
+            m.saveSettings()
+            session.unlockMachine()
+            return True
         uuid = self.getUUIDByName(name)
         if uuid is not None:
             hdd = vbox.createMedium("vdi", store_path, self.ctx['global'].constants.AccessMode_ReadWrite, 
                                     self.ctx['global'].constants.DeviceType_HardDisk)
             hdd.createBaseStorage(store_mb, (self.ctx['global'].constants.MediumVariant_Standard, ))
             mach = argsToMach(self.ctx, [name, uuid])
-            session = self.ctx['global'].openMachineSession(mach, fPermitSharing=True)
-            mach = session.machine
+            m = mach
+            session = self.ctx['global'].getSessionObject(vbox)
+            m.lockMachine(session, self.ctx['global'].constants.LockType_Write)
+            controller_name = "SATA"
             try:
-                m = mach
-                [ctr, port, slot] = findDevOfType(self.ctx, m, self.ctx['global'].constants.DeviceType_HardDisk)
-                m.attachDevice(ctr, port, slot, self.ctx['global'].constants.DeviceType_HardDisk, hdd.id)
-                m.MemorySize = memory_gb * 1024
-                m.CPUCount = cpu_count
-                m.saveSettings()
-            finally:
-                session.unlockMachine()
+                sata_controller = m.addStorageController(controller_name, self.ctx['global'].constants.StorageBus_SATA)
+                sata_controller.portCount = 30
+                sata_controller.useHostIOCache = True
+            except Exception as e:
+                return False
+            hdd = self.ctx['vbox'].createHardDisk("VDI", str(store_path))
+            progress = hdd.createBaseStorage(store_mb * 1024 * 1024, [self.ctx['global'].constants.MediumVariant_Standard])
+            progress.waitForCompletion(-1)
+            try:
+                mutable.attachDevice(
+                    controller_name,
+                    0,              
+                    0,              
+                    self.ctx['global'].constants.DeviceType_HardDisk,
+                    hdd             
+                )
 
+                mutable.memorySize = memory_gb * 1024
+                mutable.CPUCount = cpu_count
+                mutable.saveSettings()
+            finally:
+                m.session.unlockMachine()
+        
     def getUUIDByName(self, name):
         for mach in getMachines(self.ctx, True):
             try:
