@@ -105,6 +105,7 @@ class WindowsFileSource:
             #vbox.start_vm(vm_name)
             #wait install finish
             #vbox.start_shutdown(vm_name)
+            #get iso sha1
             #save info to db
                     
     # Simulate analyze VMDK operation
