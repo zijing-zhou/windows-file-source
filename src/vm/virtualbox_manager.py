@@ -5,6 +5,7 @@ from vm.vboxshell import removeVm
 from vm.vboxshell import argsToMach
 from vm.vboxshell import getMachines
 from vm.vboxshell import findDevOfType
+from pathlib import Path
 
 class VirtualBox:
     def __init__(self, ctx=None):
@@ -20,144 +21,90 @@ class VirtualBox:
         self.ctx = ctx
         self.vbox_mgr = vbox_mgr
 
-    def create_windows_vm(self, name, arch, kind):
+    def create_windows_vm(self, mach_name, arch, kind):
         if '_machlist' not in self.ctx:
             self.ctx['_machlist'] = None
-        createVm(self.ctx, name, arch, kind)
+        createVm(self.ctx, mach_name, arch, kind)
 
-    def start_windows_vm(self, name):
-        uuid = self.getUUIDByName(name)
-        if uuid is not None:
-            mach = argsToMach(self.ctx, [name, uuid])
-            startVm(self.ctx, mach, "gui")
+    def start_windows_vm(self, mach_name):
+        mach_uuid = self.getUUIDByName(mach_name)
+        if mach_uuid is not None:
+            mach_mach = argsToMach(self.ctx, [mach_name, mach_uuid])
+            startVm(self.ctx, mach_mach, "gui")
 
-    def poweroff_windows_vm(self, name):
-        uuid = self.getUUIDByName(name)
-        if uuid is not None:
-            mach = argsToMach(self.ctx, [name, uuid])
+    def poweroff_windows_vm(self, mach_name):
+        mach_uuid = self.getUUIDByName(mach_name)
+        if mach_uuid is not None:
+            mach_mach = argsToMach(self.ctx, [mach_name, mach_uuid])
         pass
 
-    def backup_windows_vm(self, name):
-        uuid = self.getUUIDByName(name)
-        if uuid is not None:
-            mach = argsToMach(self.ctx, [name, uuid])
+    def backup_windows_vm(self, mach_name):
+        mach_uuid = self.getUUIDByName(mach_name)
+        if mach_uuid is not None:
+            mach_mach = argsToMach(self.ctx, [mach_name, mach_uuid])
         pass
 
-    def restore_windows_vm(self, name):
-        uuid = self.getUUIDByName(name)
-        if uuid is not None:
-            mach = argsToMach(self.ctx, [name, uuid])
+    def restore_windows_vm(self, mach_name):
+        mach_uuid = self.getUUIDByName(mach_name)
+        if mach_uuid is not None:
+            mach_mach = argsToMach(self.ctx, [mach_name, mach_uuid])
         pass
         
-    def remove_windows_vm(self, name):
-        uuid = self.getUUIDByName(name)
-        if uuid is not None:
-            mach = argsToMach(self.ctx, [name, uuid])
-            removeVm(self.ctx, mach)
-        
-    def create_storage_controller(self, machine):
-        try:
-            controller_name = "SATA Controller"
-            controller = machine.addStorageController(
-                controller_name,
-                self.ctx['global'].constants.StorageBus_SATA
-            )
-            
-            controller.portCount = 30
-            controller.useHostIOCache = True
-            
-            return {
-                'controller': 0,
-                'port': 0,      
-                'slot': 0       
-            }
-        except Exception as e:
-            return None
+    def remove_windows_vm(self, mach_name):
+        mach_uuid = self.getUUIDByName(mach_name)
+        if mach_uuid is not None:
+            mach_mach = argsToMach(self.ctx, [mach_name, mach_uuid])
+            removeVm(self.ctx, mach_mach)
     
-    def set_vm_resources(self, name, store_path, store_mb,
+    def set_vm_resources(self, mach_name, store_path, store_mb, iso_path,
                          cpu_count: int = 2, memory_gb: int = 4):
         vbox = self.ctx['vb']
-        session = self.ctx['global'].getSessionObject(vbox)
-        
-        uuid = self.getUUIDByName(name)
-        if uuid is not None:
-            mach = argsToMach(self.ctx, [name, uuid])
-        
-            lock_result = mach.lockMachine(session, self.ctx['global'].constants.LockType_Write)
-            if lock_result != 0:
-                return False
-
-            m = session.machine
-
-            hdd = vbox.createMedium("vdi", store_path, 
-                                self.ctx['global'].constants.AccessMode_ReadWrite, 
-                                self.ctx['global'].constants.DeviceType_HardDisk)
-            progress = hdd.createBaseStorage(store_mb * 1024 * 1024, 
-                                            [self.ctx['global'].constants.MediumVariant_Standard])
-            progress.waitForCompletion(-1)
-            if progress.resultCode != 0:
-                return False
-
-            controller_name = "SATA"
-            try:
-                sata_controller = m.addStorageController(controller_name, 
-                                                    self.ctx['global'].constants.StorageBus_SATA)
-                sata_controller.portCount = 30
-                sata_controller.useHostIOCache = True
-                
-            except Exception as e:
-                return False
-
-            m.saveSettings()
-            session.unlockMachine()
-            return True
-        uuid = self.getUUIDByName(name)
-        if uuid is not None:
-            hdd = vbox.createMedium("vdi", store_path, self.ctx['global'].constants.AccessMode_ReadWrite, 
+        controller_name = "SATA"
+        mach_uuid = self.getUUIDByName(mach_name)
+        try:
+            if mach_uuid is not None:
+                mach = argsToMach(self.ctx, [mach_name, mach_uuid])        
+                session = self.ctx['global'].openMachineSession(mach)
+                mach_session = session.machine
+                hdd = vbox.createMedium("vdi", store_path, 
+                                    self.ctx['global'].constants.AccessMode_ReadWrite, 
                                     self.ctx['global'].constants.DeviceType_HardDisk)
-            hdd.createBaseStorage(store_mb, (self.ctx['global'].constants.MediumVariant_Standard, ))
-            mach = argsToMach(self.ctx, [name, uuid])
-            m = mach
-            session = self.ctx['global'].getSessionObject(vbox)
-            m.lockMachine(session, self.ctx['global'].constants.LockType_Write)
-            controller_name = "SATA"
-            try:
-                sata_controller = m.addStorageController(controller_name, self.ctx['global'].constants.StorageBus_SATA)
-                sata_controller.portCount = 30
-                sata_controller.useHostIOCache = True
-            except Exception as e:
-                return False
-            hdd = self.ctx['vbox'].createHardDisk("VDI", str(store_path))
-            progress = hdd.createBaseStorage(store_mb * 1024 * 1024, [self.ctx['global'].constants.MediumVariant_Standard])
-            progress.waitForCompletion(-1)
-            try:
-                mutable.attachDevice(
-                    controller_name,
-                    0,              
-                    0,              
-                    self.ctx['global'].constants.DeviceType_HardDisk,
-                    hdd             
-                )
+                hdd.createBaseStorage(store_mb * 1024 * 1024, 
+                                    [self.ctx['global'].constants.MediumVariant_Standard])
+                storage_controller = None
+                controller_type = self.ctx['global'].constants.StorageBus_SATA
+                for ctrl in mach_session.storageControllers:
+                    if ctrl.name == controller_name and ctrl.bus == controller_type:
+                        storage_controller = ctrl
+                        break
+                if storage_controller is None:
+                    storage_controller = mach_session.addStorageController(controller_name, controller_type)            
+                mach_session.attachDevice(controller_name, 0, 0, self.ctx['global'].constants.DeviceType_HardDisk, hdd)
+                iso = vbox.openMedium(iso_path, self.ctx['global'].constants.DeviceType_DVD, self.ctx['global'].constants.AccessMode_ReadOnly, False) 
+                mach_session.attachDevice(controller_name, 1, 0, self.ctx['global'].constants.DeviceType_DVD, iso)
+                settingsFilePath = Path(mach_session.settingsFilePath)
+                vmPath = settingsFilePath.parent
+                autounattend = vbox.openMedium( vmPath / "autounattend.iso", self.ctx['global'].constants.DeviceType_DVD, self.ctx['global'].constants.AccessMode_ReadOnly, False) 
+                mach_session.attachDevice(controller_name, 2, 0, self.ctx['global'].constants.DeviceType_DVD, autounattend)
+                mach_session.memorySize = memory_gb * 1024
+                mach_session.CPUCount = cpu_count
+                mach_session.saveSettings()
+        except Exception as e:
+            return False            
 
-                mutable.memorySize = memory_gb * 1024
-                mutable.CPUCount = cpu_count
-                mutable.saveSettings()
-            finally:
-                m.session.unlockMachine()
-        
-    def getUUIDByName(self, name):
+    def getUUIDByName(self, mach_name):
         for mach in getMachines(self.ctx, True):
             try:
-                if mach.name == name:
+                if mach.name == mach_name:
                     return mach.id
             except Exception as e:
                 return None
         return None
 
-    def getSettingsFilePathByName(self, name):
+    def getSettingsFilePathByName(self, mach_name):
         for mach in getMachines(self.ctx, True):
             try:
-                if mach.name == name:
+                if mach.name == mach_name:
                     return mach.settingsFilePath
             except Exception as e:
                 return None
