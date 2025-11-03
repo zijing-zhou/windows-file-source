@@ -9,7 +9,6 @@ from iso.make_iso import ISOBuilder
 from myos.windows.make_autounattend import AutoUnattendGenerator
 from pathlib import Path
 
-
 class WindowsFileSource:
     def __init__(self):
         pass
@@ -66,11 +65,11 @@ class WindowsFileSource:
     def install_windows_vm(self):
         root = tk.Tk()
         root.withdraw()        
-        file_path = filedialog.askopenfilename(
+        iso_file_path = filedialog.askopenfilename(
             title="Open ISO File",
             filetypes=[("ISO files", "*.iso"), ("All files", "*.*")] 
         )
-        if file_path:
+        if iso_file_path:
             cpu_num = self.ask_number("Number of CPU", "Please enter the number:", "4")
             if cpu_num is None:
                 return
@@ -79,15 +78,13 @@ class WindowsFileSource:
                 return
             vbox = VirtualBox()
             vm_name = self.generate_timestamp_name()
-            arch = self.get_iso_arch_by_name(file_path)
-            version = self.get_windows_version(file_path)
+            arch = self.get_iso_arch_by_name(iso_file_path)
+            version = self.get_windows_version(iso_file_path)
             kind = version + '_' + arch[1:]
             vbox.create_windows_vm(vm_name, arch, kind)
             settingsFilePath = vbox.getSettingsFilePathByName(vm_name)
             file_path = Path(settingsFilePath)
             settingsFileDirectory = file_path.parent
-            vbox.set_vm_resources(vm_name, memory_gb = memory_num, cpu_count = cpu_num, 
-                                  store_mb = 1024*100, store_path = settingsFileDirectory / "store.vdi")
             os.makedirs(settingsFileDirectory / "iso", exist_ok=True)
             generator = AutoUnattendGenerator(
                 username="AdminUser",
@@ -100,6 +97,9 @@ class WindowsFileSource:
             output_iso = Path(settingsFileDirectory / "autounattend.iso")
             builder = ISOBuilder()
             builder.write(output_iso, settingsFileDirectory / "iso", vm_name)
+            vbox.set_vm_resources(vm_name, memory_gb = memory_num, cpu_count = cpu_num, 
+                                  store_mb = 1024*100, store_path = settingsFileDirectory / "store.vdi", 
+                                  iso_path = iso_file_path)
             #add iso
             #add hhd
             #vbox.start_vm(vm_name)
