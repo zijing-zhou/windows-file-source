@@ -2,147 +2,215 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 class AutoUnattendGenerator:
-    def __init__(self, username, password, hostname, timezone, language):
+    def __init__(self, username, password, hostname="WindowsPC", timezone="China Standard Time", kind="Windows_10"):
         self.username = username
         self.password = password
-        self.hostname = hostname
+        self.computer_name = hostname
         self.timezone = timezone
-        self.language = language
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
-import datetime
-
-class AutoUnattendGenerator:
-    UNATTEND_NS = "urn:schemas-microsoft-com:unattend"
-
-    def __init__(self, username: str, password: str, hostname: str,
-                 timezone: str = "China Standard Time", language: str = "zh-CN"):
-        self.username = username
-        self.password = password
-        self.hostname = hostname
-        self.timezone = timezone
-        self.language = language
-        # validate minimal
-        if not all([username, password, hostname]):
-            raise ValueError("username, password, hostname error")
-
-    def _add_text_element(self, parent, tag, text):
-        el = ET.SubElement(parent, tag)
-        el.text = str(text)
-        return el
-
-    def _pretty_xml(self, root: ET.Element) -> str:
-        rough = ET.tostring(root, encoding="utf-8")
-        reparsed = minidom.parseString(rough)
-        return reparsed.toprettyxml(indent="  ", encoding="utf-8").decode('utf-8')
-
-    def generate_windows10(self, filename):
-        self.render()
-        self.write_file(filename)
-
-    def render(self) -> str:
-        import xml.etree.ElementTree as ET
-        from xml.dom import minidom
-
-        ET.register_namespace('', self.UNATTEND_NS)
-        ET.register_namespace('wcm', "http://schemas.microsoft.com/WMIConfig/2002/State")
-        ET.register_namespace('cpi', "urn:schemas-microsoft-com:cpi")
-
-        # Root element
-        unattend = ET.Element(ET.QName(self.UNATTEND_NS, "unattend"))
-
-        settings_wp = ET.SubElement(unattend, "settings", {"pass": "windowsPE"})
-        component_wp = ET.SubElement(settings_wp, "component", {
-            "name": "Microsoft-Windows-Setup",
-            "processorArchitecture": "amd64",
-            "publicKeyToken": "31bf3856ad364e35",
-            "language": "neutral",
-            "versionScope": "nonSxS"
-        })
-        user_data = ET.SubElement(component_wp, "UserData")
-        self._add_text_element(user_data, "AcceptEula", "true")
-
-        settings_spec = ET.SubElement(unattend, "settings", {"pass": "specialize"})
-        comp_spec = ET.SubElement(settings_spec, "component", {
-            "name": "Microsoft-Windows-Shell-Setup",
-            "processorArchitecture": "amd64",
-            "publicKeyToken": "31bf3856ad364e35",
-            "language": "neutral",
-            "versionScope": "nonSxS"
-        })
-        self._add_text_element(comp_spec, "ComputerName", self.hostname)
-        self._add_text_element(comp_spec, "TimeZone", self.timezone)
-
-        settings_oobe = ET.SubElement(unattend, "settings", {"pass": "oobeSystem"})
-        comp_oobe = ET.SubElement(settings_oobe, "component", {
-            "name": "Microsoft-Windows-Shell-Setup",
-            "processorArchitecture": "amd64",
-            "publicKeyToken": "31bf3856ad364e35",
-            "language": "neutral",
-            "versionScope": "nonSxS"
-        })
-
-        self._add_text_element(comp_oobe, "RegisteredOwner", self.username)
-
-        autologon = ET.SubElement(comp_oobe, "AutoLogon")
-        password_el = ET.SubElement(autologon, "Password")
-        self._add_text_element(password_el, "Value", self.password)
-        self._add_text_element(password_el, "PlainText", "true")
-        self._add_text_element(autologon, "Enabled", "true")
-        self._add_text_element(autologon, "Username", self.username)
-
-        oobe = ET.SubElement(comp_oobe, "OOBE")
-        self._add_text_element(oobe, "HideEULAPage", "true")
-        self._add_text_element(oobe, "HideWirelessSetupInOOBE", "true")
-        self._add_text_element(oobe, "NetworkLocation", "Work")
-        self._add_text_element(oobe, "ProtectYourPC", "1")
-
-        ua = ET.SubElement(comp_oobe, "UserAccounts")
-        local_accounts = ET.SubElement(ua, "LocalAccounts")
-        local_account = ET.SubElement(local_accounts, "LocalAccount")
-        self._add_text_element(local_account, "Name", self.username)
-        self._add_text_element(local_account, "Group", "Administrators")
-        pw = ET.SubElement(local_account, "Password")
-        self._add_text_element(pw, "Value", self.password)
-        self._add_text_element(pw, "PlainText", "true")
-
-        comp_intl = ET.SubElement(settings_oobe, "component", {
-            "name": "Microsoft-Windows-International-Core",
-            "processorArchitecture": "amd64",
-            "publicKeyToken": "31bf3856ad364e35",
-            "language": "neutral",
-            "versionScope": "nonSxS"
-        })
-        self._add_text_element(comp_intl, "SystemLocale", self.language)
-        self._add_text_element(comp_intl, "UILanguage", self.language)
-        self._add_text_element(comp_intl, "UserLocale", self.language)
-        self._add_text_element(comp_intl, "InputLocale", self.language)
-
-        settings_audit = ET.SubElement(unattend, "settings", {"pass": "auditSystem"})
-        ET.SubElement(settings_audit, "component", {
-            "name": "Microsoft-Windows-Deployment",
-            "processorArchitecture": "amd64",
-            "publicKeyToken": "31bf3856ad364e35",
-            "language": "neutral",
-            "versionScope": "nonSxS"
-        })
-
-        offline_image = ET.SubElement(
-            unattend,
-            ET.QName("urn:schemas-microsoft-com:cpi", "offlineImage")
+        
+    def _create_element(self, tag, text=None, **attrib):
+        element = ET.Element(tag, **attrib)
+        if text is not None:
+            element.text = text
+        return element
+    
+    def _create_component(self, name, arch="amd64", public_key_token="31bf3856ad364e35", 
+                         language="neutral", version_scope="nonSxS"):
+        return self._create_element(
+            'component',
+            name=name,
+            processorArchitecture=arch,
+            publicKeyToken=public_key_token,
+            language=language,
+            versionScope=version_scope
         )
-        offline_image.set(ET.QName("http://schemas.microsoft.com/WMIConfig/2002/State", "action"), "add")
-        offline_image.set(ET.QName("http://schemas.microsoft.com/WMIConfig/2002/State", "source"), "")
+    
+    def _create_windowsPE_settings(self):
+        settings_attrib = {'pass': 'windowsPE'}
+        settings = self._create_element('settings', **settings_attrib)
 
-        rough = ET.tostring(unattend, encoding="utf-8")
-        reparsed = minidom.parseString(rough)
-        xml_text = reparsed.toprettyxml(indent="  ", encoding="utf-8").decode("utf-8")
-        return "\n".join([line for line in xml_text.splitlines() if line.strip()])
+        intl_component = self._create_component("Microsoft-Windows-International-Core-WinPE")
+        intl_component.append(self._create_element('InputLocale', 'en-US'))
+        intl_component.append(self._create_element('SystemLocale', 'en-US'))
+        intl_component.append(self._create_element('UserLocale', 'en-US'))
+        intl_component.append(self._create_element('UILanguage', 'zh-CN'))
+        settings.append(intl_component)
 
-    def write_file(self, path: str = "autounattend.xml"):
-        xml_str = self.render()
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(xml_str)
-        return path
+        setup_component = self._create_component("Microsoft-Windows-Setup")
 
+        disk_config = self._create_element('DiskConfiguration')
+        disk_config.append(self._create_element('WillShowUI', 'OnError'))
+        
+        disk = self._create_element('Disk')
+        disk.append(self._create_element('DiskID', '0'))
+        disk.append(self._create_element('WillWipeDisk', 'true'))
+        
+        create_partitions = self._create_element('CreatePartitions')
+        create_partition = self._create_element('CreatePartition')
+        create_partition.append(self._create_element('Order', '1'))
+        create_partition.append(self._create_element('Type', 'Primary'))
+        create_partition.append(self._create_element('Extend', 'true'))
+        create_partitions.append(create_partition)
+        
+        disk.append(create_partitions)
+        disk_config.append(disk)
+        setup_component.append(disk_config)
 
+        user_data = self._create_element('UserData')
+        user_data.append(self._create_element('AcceptEula', 'true'))
+        setup_component.append(user_data)
+
+        image_install = self._create_element('ImageInstall')
+        os_image = self._create_element('OSImage')
+        
+        install_from = self._create_element('InstallFrom')
+        meta_data = self._create_element('MetaData', **{'wcm:action': 'add'})
+        meta_data.append(self._create_element('Key', '/IMAGE/INDEX'))
+        meta_data.append(self._create_element('Value', '1'))
+        install_from.append(meta_data)
+        os_image.append(install_from)
+        
+        install_to = self._create_element('InstallTo')
+        install_to.append(self._create_element('DiskID', '0'))
+        install_to.append(self._create_element('PartitionID', '1'))
+        os_image.append(install_to)
+        
+        os_image.append(self._create_element('WillShowUI', 'OnError'))
+        os_image.append(self._create_element('InstallToAvailablePartition', 'false'))
+        image_install.append(os_image)
+        setup_component.append(image_install)
+
+        compliance_check = self._create_element('ComplianceCheck')
+        compliance_check.append(self._create_element('DisplayReport', 'OnError'))
+        setup_component.append(compliance_check)
+        
+        settings.append(setup_component)
+        return settings
+    
+    def _create_specialize_settings(self):
+        settings_attrib = {'pass': 'specialize'}
+        settings = self._create_element('settings', **settings_attrib)
+
+        shell_component = self._create_component("Microsoft-Windows-Shell-Setup")
+        shell_component.append(self._create_element('ComputerName', self.computer_name))
+        settings.append(shell_component)
+
+        deployment_component = self._create_component("Microsoft-Windows-Deployment")
+        settings.append(deployment_component)
+        
+        return settings
+    
+    def _create_oobeSystem_settings(self):
+        settings_attrib = {'pass': 'oobeSystem'}
+        settings = self._create_element('settings', **settings_attrib)
+        
+        shell_component = self._create_component("Microsoft-Windows-Shell-Setup")
+
+        autologon = self._create_element('AutoLogon')
+        
+        password_elem = self._create_element('Password')
+        password_elem.append(self._create_element('Value', self.password))
+        password_elem.append(self._create_element('PlainText', 'true'))
+        autologon.append(password_elem)
+        
+        autologon.append(self._create_element('Enabled', 'true'))
+        autologon.append(self._create_element('Username', self.username))
+        shell_component.append(autologon)
+
+        user_accounts = self._create_element('UserAccounts')
+
+        admin_password = self._create_element('AdministratorPassword')
+        admin_password.append(self._create_element('Value', self.password))
+        admin_password.append(self._create_element('PlainText', 'true'))
+        user_accounts.append(admin_password)
+
+        local_accounts = self._create_element('LocalAccounts')
+        local_account_attrib = {'wcm:action': 'add'}
+        local_account = self._create_element('LocalAccount', **local_account_attrib)
+        local_account.append(self._create_element('Name', self.username))
+        local_account.append(self._create_element('DisplayName', self.username))
+        local_account.append(self._create_element('Group', 'administrators;users'))
+        
+        local_password = self._create_element('Password')
+        local_password.append(self._create_element('Value', self.password))
+        local_password.append(self._create_element('PlainText', 'true'))
+        local_account.append(local_password)
+        
+        local_accounts.append(local_account)
+        user_accounts.append(local_accounts)
+        shell_component.append(user_accounts)
+
+        visual_effects = self._create_element('VisualEffects')
+        visual_effects.append(self._create_element('FontSmoothing', 'ClearType'))
+        shell_component.append(visual_effects)
+
+        oobe = self._create_element('OOBE')
+        oobe.append(self._create_element('ProtectYourPC', '3'))
+        oobe.append(self._create_element('HideEULAPage', 'true'))
+        oobe.append(self._create_element('SkipUserOOBE', 'true'))
+        oobe.append(self._create_element('SkipMachineOOBE', 'true'))
+        oobe.append(self._create_element('NetworkLocation', 'Home'))
+        shell_component.append(oobe)
+
+        first_logon_commands = self._create_element('FirstLogonCommands')
+        sync_command_attrib = {'wcm:action': 'add'}
+        sync_command = self._create_element('SynchronousCommand', **sync_command_attrib)
+        sync_command.append(self._create_element('Order', '2'))
+        sync_command.append(self._create_element('Description', 'Shutdown after installation'))
+        sync_command.append(self._create_element('CommandLine', 'cmd.exe /c shutdown /s /f /t 0'))
+        first_logon_commands.append(sync_command)
+        shell_component.append(first_logon_commands)
+
+        shell_component.append(self._create_element('TimeZone', self.timezone))
+        
+        settings.append(shell_component)
+        return settings
+    
+    def generate_xml(self):
+        root = ET.Element('unattend')
+        root.set('xmlns', 'urn:schemas-microsoft-com:unattend')
+        root.set('xmlns:wcm', 'http://schemas.microsoft.com/WMIConfig/2002/State')
+        root.append(self._create_windowsPE_settings())
+        root.append(self._create_specialize_settings())
+        root.append(self._create_oobeSystem_settings())
+        rough_string = ET.tostring(root, encoding='utf-8')
+
+        from xml.dom import minidom
+        try:
+            parsed = minidom.parseString(rough_string)
+            return parsed.toprettyxml(indent="    ", encoding="utf-8").decode('utf-8')
+        except Exception as e:
+            return self._simple_pretty_xml(rough_string.decode('utf-8'))
+    
+    def _simple_pretty_xml(self, xml_string):
+        import re
+        xml_string = re.sub(r'>\s*<', '>\n<', xml_string)
+        lines = xml_string.split('\n')
+        
+        indent_level = 0
+        formatted_lines = []
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            if line.startswith('</'):
+                indent_level -= 1
+                
+            formatted_lines.append(' ' * (indent_level * 4) + line)
+            
+            if line.startswith('<') and not line.startswith('</') and not line.endswith('/>'):
+                indent_level += 1
+                
+        return '<?xml version="1.0" encoding="utf-8"?>\n' + '\n'.join(formatted_lines)
+    
+    def save_to_file(self, filename):
+        xml_content = self.generate_xml()
+        
+        from pathlib import Path
+        file_path = Path(filename)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(xml_content)
