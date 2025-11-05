@@ -91,22 +91,16 @@ class WindowsFileSource:
                 password=vm_name,
                 hostname=vm_name,
                 timezone="China Standard Time",
-                language="zh-CN"
+                kind=kind
             )
-            generator.generate_windows10(settingsFileDirectory / "iso" / "autounattend.xml")
+            generator.save_to_file(settingsFileDirectory / "iso" / "autounattend.xml")
             output_iso = Path(settingsFileDirectory / "autounattend.iso")
             builder = ISOBuilder()
             builder.write(output_iso, settingsFileDirectory / "iso", vm_name)
             vbox.set_vm_resources(vm_name, memory_gb = memory_num, cpu_count = cpu_num, 
                                   store_mb = 1024*100, store_path = settingsFileDirectory / "store.vdi", 
                                   iso_path = iso_file_path)
-            #add iso
-            #add hhd
-            #vbox.start_vm(vm_name)
-            #wait install finish
-            #vbox.start_shutdown(vm_name)
-            #get iso sha1
-            #save info to db
+            vbox.start_windows_vm(vm_name)
                     
     # Simulate analyze VMDK operation
     def analyze_vmdk(self):
