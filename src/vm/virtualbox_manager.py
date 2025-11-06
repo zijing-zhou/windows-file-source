@@ -24,7 +24,9 @@ class VirtualBox:
     def create_windows_vm(self, mach_name, arch, kind):
         if '_machlist' not in self.ctx:
             self.ctx['_machlist'] = None
-        createVm(self.ctx, mach_name, arch, kind)
+        mach_uuid = self.getUUIDByName(mach_name)
+        if mach_uuid is None:
+            createVm(self.ctx, mach_name, arch, kind)
 
     def start_windows_vm(self, mach_name):
         mach_uuid = self.getUUIDByName(mach_name)
