@@ -18,7 +18,7 @@ class WindowsFileSource:
         print("\n1. Download ISO")
         print("2. Analyze ISO")
         print("3. Install Windows Virtual Machine")
-        print("4. Analyze VMDK File")
+        print("4. Analyze VDI File")
         print("5. Import Local ISO")
         print("6. Exit")
 
@@ -33,7 +33,7 @@ class WindowsFileSource:
         elif choice == "3":
             self.install_windows_vm()
         elif choice == "4":
-            self.analyze_vmdk()
+            self.analyze_vdi()
         elif choice == "5":
             self.import_local_iso()
         elif choice == "6":
@@ -103,8 +103,16 @@ class WindowsFileSource:
             vbox.start_windows_vm(vm_name)
                     
     # Simulate analyze VMDK operation
-    def analyze_vmdk(self):
+    def analyze_vdi(self):
         print("Analyzing VMDK file...")
+        root = tk.Tk()
+        root.withdraw()        
+        vdi_file_path = filedialog.askopenfilename(
+            title="Open VDI File",
+            filetypes=[("VDI files", "*.vdi"), ("All files", "*.*")] 
+        )
+        if vdi_file_path:
+            pass       
 
     # Simulate import local ISO operation
     def import_local_iso(self):
