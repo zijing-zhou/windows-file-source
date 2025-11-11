@@ -113,7 +113,12 @@ class VirtualBox:
         finally:
             if session:
                 session.unlockMachine();
-        
+    
+    def analyze_vdi(self, file_name):
+        vbox = self.ctx['vb']
+        vdi_medium = vbox.findMedium(file_name, self.ctx['global'].constants.DeviceType_HardDisk)
+        pass
+
     def getUUIDByName(self, mach_name):
         for mach in getMachines(self.ctx, True):
             try:
