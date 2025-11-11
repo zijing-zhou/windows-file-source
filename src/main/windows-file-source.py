@@ -112,7 +112,8 @@ class WindowsFileSource:
             filetypes=[("VDI files", "*.vdi"), ("All files", "*.*")] 
         )
         if vdi_file_path:
-            pass       
+            vbox = VirtualBox()
+            vbox.analyze_vdi(vdi_file_path)      
 
     # Simulate import local ISO operation
     def import_local_iso(self):
