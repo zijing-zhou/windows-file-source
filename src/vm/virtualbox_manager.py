@@ -6,6 +6,8 @@ from vm.vboxshell import argsToMach
 from vm.vboxshell import getMachines
 from vm.vboxshell import findDevOfType
 from pathlib import Path
+import os
+import inspect
 import time
 class VirtualBox:
     def __init__(self, ctx=None):
@@ -79,7 +81,7 @@ class VirtualBox:
                 if storage_controller is None:
                     storage_controller = mach_session.addStorageController(controller_name, controller_type)
                 # create hard disk object
-                hdd = vbox.createMedium("vdi", store_path, 
+                hdd = vbox.createMedium("VMDK", store_path, #vdi 
                                     self.ctx['global'].constants.AccessMode_ReadWrite,
                                     self.ctx['global'].constants.DeviceType_HardDisk)
                 hdd.createBaseStorage(store_mb * 1024 * 1024, 
@@ -113,11 +115,18 @@ class VirtualBox:
         finally:
             if session:
                 session.unlockMachine();
+    def change_file_extension(self, file_name, old_extension, new_extension):
+        old_extension_formatted = '.' + old_extension.lstrip('.')
+        new_extension_formatted = '.' + new_extension.lstrip('.')
+        base_name, current_extension = os.path.splitext(file_name)
+        if current_extension.lower() == old_extension_formatted.lower():
+            return base_name + new_extension_formatted
+        else:
+            return file_name
     
     def analyze_vdi(self, file_name):
         vbox = self.ctx['vb']
-        vdi_medium = vbox.findMedium(file_name, self.ctx['global'].constants.DeviceType_HardDisk)
-        pass
+        new_file_name = self.change_file_extension(file_name, "vdi", "vmdk")
 
     def getUUIDByName(self, mach_name):
         for mach in getMachines(self.ctx, True):
