@@ -1,13 +1,13 @@
+import _version
 import os
 import re
-import _version
-from datetime import datetime
 import tkinter as tk
-from tkinter import filedialog, simpledialog, messagebox
-from vm.virtualbox_manager import VirtualBox
+from datetime import datetime
 from iso.make_iso import ISOBuilder
 from myos.windows.make_autounattend import AutoUnattendGenerator
 from pathlib import Path
+from tkinter import filedialog, simpledialog, messagebox
+from vm.virtualbox_manager import VirtualBox
 
 class WindowsFileSource:
     def __init__(self):
