@@ -76,6 +76,9 @@ class WindowsFileSource:
             memory_num = self.ask_number("Base Memory(GB)", "Please enter the number:", "16")
             if memory_num is None:
                 return
+            disk_size = self.ask_number("Disk Store(GB)", "Please enter the number:", "100")
+            if disk_size is None:
+                return
             vbox = VirtualBox()
             vm_name = self.generate_timestamp_name()
             arch = self.get_iso_arch_by_name(iso_file_path)
@@ -98,7 +101,7 @@ class WindowsFileSource:
             builder = ISOBuilder()
             builder.write(output_iso, settingsFileDirectory / "iso", vm_name)
             vbox.set_vm_resources(vm_name, memory_gb = memory_num, cpu_count = cpu_num, 
-                                  store_mb = 1024*100, store_path = settingsFileDirectory / "store.vdi", 
+                                  store_mb = 1024*disk_size, store_path = settingsFileDirectory / "store.vdi", 
                                   iso_path = iso_file_path)
             vbox.start_windows_vm(vm_name)
                     
