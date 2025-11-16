@@ -104,6 +104,8 @@ class WindowsFileSource:
                                   store_mb = 1024*disk_size, store_path = settingsFileDirectory / "store.vdi", 
                                   iso_path = iso_file_path)
             vbox.start_windows_vm(vm_name)
+            # Waiting for installation to complete
+            # Save VM details to the database
                     
     # Simulate analyze VMDK operation
     def analyze_vdi(self):
