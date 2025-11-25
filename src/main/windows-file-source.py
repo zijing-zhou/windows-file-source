@@ -20,7 +20,8 @@ class WindowsFileSource:
         print("3. Install Windows Virtual Machine")
         print("4. Analyze VDI File")
         print("5. Import Local ISO")
-        print("6. Exit")
+        print("6. ISO and VMDK file association")
+        print("7. Exit")
 
         # Get the user's input
         choice = input("Please choose an option (1-6): ")
@@ -37,6 +38,8 @@ class WindowsFileSource:
         elif choice == "5":
             self.import_local_iso()
         elif choice == "6":
+            self.iso_vmdk_association()
+        elif choice == "7":
             print("Exiting... Goodbye!")
             return False  # Exit the loop
         else:
@@ -148,11 +151,12 @@ class WindowsFileSource:
             elif any(x in filename for x in ['win7', 'windows7', 'win 7', 'windows 7', 'windows_7']):
                 return 'Windows7'
             else:
-                return 'Unknown'
-                
+                return 'Unknown'                
         except Exception as e:
             print(f"Error: {str(e)}")
             return 'Unknown'
+    iso_vmdk_association(self):
+        pass
         
 # The main loop for interacting with the user
 if __name__ == '__main__':
