@@ -58,5 +58,23 @@ CREATE TABLE IF NOT EXISTS windows_file_info (
     Extension TEXT
 )
 """)
+cur.execute("""
+CREATE TABLE IF NOT EXISTS vm_info (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    vm_name TEXT NOT NULL UNIQUE,
+    generation_time DATETIME,
+    iso_id TEXT,
+    operating_system TEXT,
+    vm_file_name TEXT,
+    vm_path TEXT,
+    cpu_cores INTEGER,
+    memory_mb INTEGER,
+    disk_size_gb INTEGER,
+    status TEXT,
+    host_server TEXT,
+    insert_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_update_time DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+""")
 conn.commit()
 conn.close()
