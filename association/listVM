@@ -1,0 +1,26 @@
+import sqlite3
+import os
+
+class SQLiteQueryHelper:
+    def __init__(self, db_path: str):
+        self.db_path = db_path
+
+    def _execute_query(self, query: str, fetch_results: bool = False):
+        results = None
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute(query)
+                results = cursor.fetchall()                
+            return results
+        except sqlite3.Error as e:
+            raise
+
+    def select_all_as_object_list(self, table_name: str) -> list:
+        query = f"SELECT id,vm_name,generation_time,iso_id,operating_system, FROM vm_info order by id"
+        try:
+            results = self._execute_query(query, fetch_results=True)
+            return results if results is not None else []
+        except sqlite3.Error:
+            return []
